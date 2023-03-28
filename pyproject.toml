@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "blab-chatbot-interpreter"
+version = "0.1.0"
+description = ""
+authors = ["C4AI"]
+readme = "README.md"
+packages = [{include = "blab_chatbot_interpreter"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+blab-chatbot-bot-client = {extras = ["ws"], git = "https://github.com/C4AI/blab-chatbot-bot-client.git", branch = "main"}
+jinja2 = "^3.1.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.3.0"
+darglint = "*"
+flake8 = "*"
+flake8-annotations = "*"
+flake8-docstrings = "*"
+flake8-bugbear = "*"
+python-lsp-server = { extras = ["all"], version = "*" }
+pyupgrade = "*"
+mypy = "^0.931"
+pre-commit = "^2.18.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
