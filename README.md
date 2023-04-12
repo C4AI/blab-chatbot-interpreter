@@ -53,3 +53,8 @@ This bot should be used with [BLAB Controller](../../../blab-controller).
 
 - Follow [these instructions](../../../blab-chatbot-bot-client/blob/main/RUN.md) to execute the
   program.
+
+**IMPORTANT:** Make sure that the interpreter bots do not use the message history on their own, because the previous
+messages are
+included in the prompt. For example, if
+[the interpreter bot is uses one of the OpenAI bots](../../../blab-chatbot-openai/), set `HISTORY_SIZE` to 1.
