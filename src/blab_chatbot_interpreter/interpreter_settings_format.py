@@ -9,8 +9,14 @@ class InterpreterTemplatePathSettings(TypedDict):
     COMPLETION: str
 
 
+class InterpreterNameSettings(TypedDict):
+    CORRECTION: str
+    REDIRECTION: str
+    COMPLETION: str
+
+
 class InterpreterSettings(TypedDict):
-    INTERPRETER_BOT_NAME: str
+    INTERPRETER_BOT_NAMES: InterpreterNameSettings
     TEMPLATE_FILE_NAMES: InterpreterTemplatePathSettings
     HISTORY_SIZE: int
     ANSWERERS: dict[str, str]

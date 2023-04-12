@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from itertools import islice
 from operator import itemgetter
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 from blab_chatbot_bot_client.conversation_websocket import (
     WebSocketBotClientConversation,
@@ -73,7 +73,7 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
         """Create an instance. The history deque is initialized as empty."""
         super().__init__(*args, **kwargs)
 
-        self.interpreter_id: str | None = None
+        self.interpreter_ids: dict[Task, str | None] = {}
 
         self.debug: bool = bool(self.settings.INTERPRETER_SETTINGS.get("DEBUG", False))
 
@@ -98,8 +98,11 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
         self.on_delivery = {}
 
     def _process_template_path(self, task: Task):
-        # noinspection PyTypedDict
-        p = Path(self.settings.INTERPRETER_SETTINGS["TEMPLATE_FILE_NAMES"][task.name])
+        p = Path(
+            self.settings.INTERPRETER_SETTINGS["TEMPLATE_FILE_NAMES"][
+                cast(Literal["CORRECTION", "REDIRECTION", "COMPLETION"], task.name)
+            ]
+        )
         directory, name = str(p.parent), p.name
         if directory not in self.jinja_environments:
             self.jinja_environments[directory] = Environment(
@@ -142,7 +145,7 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
                 command=json.dumps(
                     {
                         "self_redirect": True,
-                        "bots": [self.interpreter_id],
+                        "bots": [self.interpreter_ids[Task.CORRECTION]],
                         "overrides": {"sent_by_human": True},
                     }
                 ),
@@ -175,7 +178,7 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
                 command=json.dumps(
                     {
                         "self_redirect": True,
-                        "bots": [self.interpreter_id],
+                        "bots": [self.interpreter_ids[Task.REDIRECTION]],
                         "overrides": {"sent_by_human": True},
                     }
                 ),
@@ -249,7 +252,7 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
                 command=json.dumps(
                     {
                         "self_redirect": True,
-                        "bots": [self.interpreter_id],
+                        "bots": [self.interpreter_ids[Task.COMPLETION]],
                         "overrides": {"sent_by_human": True},
                     }
                 ),
@@ -305,7 +308,7 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
         elif message.sent_by_human:
             # new message from the user
             self.handle_new_message(message)
-        elif message.sender_id == self.interpreter_id:
+        elif message.sender_id in self.interpreter_ids.values():
             # answer from the interpreter - deal with the different types
             self._handle_interpreter_answer(message)
         elif m_id := self.request_ids[Task.ANSWER].get(message.quoted_message_id, ""):
@@ -319,6 +322,12 @@ class InterpreterWebSocketBotClientConversation(WebSocketBotClientConversation):
             self.current_participants = dict(
                 map(itemgetter("name", "id"), event["participants"])
             )
-            self.interpreter_id = self.current_participants[
-                self.settings.INTERPRETER_SETTINGS["INTERPRETER_BOT_NAME"]
-            ]
+            self.interpreter_ids = {
+                t: self.current_participants[
+                    self.settings.INTERPRETER_SETTINGS["INTERPRETER_BOT_NAMES"][
+                        cast(Literal["CORRECTION", "REDIRECTION", "COMPLETION"], t.name)
+                    ]
+                ]
+                for t in Task.__members__.values()
+                if t != Task.ANSWER
+            }
