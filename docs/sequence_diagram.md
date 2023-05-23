@@ -12,8 +12,8 @@ sequenceDiagram
   participant ui as UI client
   participant controller as BLAB Controller
   participant interpreter as Interpreter client
-  participant llm_client as Client for LLM
-  participant llm as LLM 
+  participant llm_client as Client for<br/>external interpreter
+  participant llm as External interpreter 
   participant answerer_client as Client for the<br/>chosen answerer
   participant answerer as Chosen answerer
   
@@ -62,6 +62,12 @@ sequenceDiagram
   
 ```
 
-The controller delivers all messages back to the corresponding senders
-(which clients can use to confirm that the controller received their messages),
-but this has been omitted from the diagram to save space.
+**IMPORTANT**:
+
+- The controller delivers all messages back to the corresponding senders
+  (which clients can use to confirm that the controller received their messages),
+  but this has been omitted from the diagram to save space.
+
+- It is possible to use different services for correction,
+  redirection and completion. For the sake of simplicity, the diagram shows
+  only a single external interpreter that performs all of them.
