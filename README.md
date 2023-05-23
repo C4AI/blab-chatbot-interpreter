@@ -9,6 +9,8 @@ conversation manager and uses an interpreter to perform three tasks:
   topic;
 - **completion**: generate a complete sentence containing the answerer output.
 
+For information about the message flow, see the [sequence diagram](docs/sequence_diagram.md).
+
 This bot should be used with [BLAB Controller](../../../blab-controller).
 
 ### Installation
